@@ -1,0 +1,67 @@
+npm i g http url path cors express
+
+------------------------------------------------------------------------
+JavaScript :
+
+NOdeJS hosting
+
+http://www.hostingadvice.com/blog/where-to-find-free-node-js-hosting/
+https://makeawebsitehub.com/free-node-js-hosting/
+
+
+------------------------------------------------------------------------
+SPLIT:
+https://msdn.microsoft.com/fr-fr/library/t5az126b(v=vs.94).aspx
+
+stringObj.split([separator[, limit]])
+var s = "The quick brown fox jumps over the lazy dog.";
+var ss = s.split(" ");
+
+
+------------------------------------------------------------------------
+REPLACE
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/String/replace
+
+
+------------------------------------------------------------------------
+POST en text plain vers NodeJS/express
+https://stackoverflow.com/questions/17793344/empty-req-body-receiving-text-plain-post-request-to-node-js
+https://stackoverflow.com/questions/12497358/handling-text-plain-in-express-via-connect/12497793#12497793
+https://gist.github.com/tj/3750227
+
+https://stackoverflow.com/questions/12345166/how-to-force-parse-request-body-as-plain-text-instead-of-json-in-express
+
+
+------------------------------------------------------------------------
+STRPOS
+var str = "Hello world, welcome to the universe.";
+var n = str.indexOf("welcome");
+
+------------------------------------------------------------------------
+STR_REPEAT
+https://www.w3schools.com/jsref/jsref_repeat.asp
+
+
+------------------------------------------------------------------------
+FLOOR
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Math/floor
+console.log(Math.floor(5.95));
+// expected output: 5
+console.log(Math.floor(5.05));
+// expected output: 5
+
+
+------------------------------------------------------------------------
+ROUND
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Math/round
+
+function precisionRound(number, precision) {
+  var factor = Math.pow(10, precision);
+  return Math.round(number * factor) / factor;
+}
+console.log(precisionRound(1234.5678, 2));
+// expected output: 1234.57
+
+
+
+

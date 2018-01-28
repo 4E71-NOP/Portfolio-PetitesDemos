@@ -12,9 +12,19 @@
 $LimiteMot = 80000;
 $SessionCompteurMot = 0;
 
+
+// -----------------------------------------------------
+//	
+//	
+//	Gestion de la session
+//	
+//	
+
 if ( isset($_REQUEST['depuisFormulaire'])){
+	if ( !isset($_SESSION['consomation_mot']) ) { $_SESSION['consomation_mot'] = 0; }
 	if ( $_SESSION['consomation_mot'] > $LimiteMot ) {
 		$forbidden402 = 1;
+		include ("api/token.php");
 	}
 }
 else {
@@ -35,6 +45,7 @@ Curabitur volutpat eleifend nunc id volutpat. Fusce a libero ligula. Curabitur i
 	}
 
 	header("Content-Type: text/plain; charset=UTF-8");
+	if ( !isset($_SESSION['consomation_mot']) ) { $_SESSION['consomation_mot'] = 0; }
 	if ( $_SESSION['consomation_mot'] > $LimiteMot ) { 
 		header("HTTP/1.1 402 Payment Required" ); 
 		exit(0);
@@ -172,6 +183,12 @@ if ( !isset($forbidden402)) {
 		$SessionCompteurMot += $A['nbrmot'];		// Comptage 
 	}
 
+// -----------------------------------------------------
+//	
+//	
+//	Sortie
+//	
+//	
 	if ( isset($_REQUEST['depuisFormulaire'])){	}
 	else {
 		echo ($rendu);
