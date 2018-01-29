@@ -31,6 +31,12 @@ https://gist.github.com/tj/3750227
 
 https://stackoverflow.com/questions/12345166/how-to-force-parse-request-body-as-plain-text-instead-of-json-in-express
 
+NEW POST
+http://www.primaryobjects.com/2012/11/11/reading-post-data-in-node-js-express-easy-manager-method/
+
+
+
+
 
 ------------------------------------------------------------------------
 STRPOS
@@ -61,6 +67,11 @@ function precisionRound(number, precision) {
 }
 console.log(precisionRound(1234.5678, 2));
 // expected output: 1234.57
+
+
+Gestion objet:
+https://stackoverflow.com/questions/1168807/how-can-i-add-a-key-value-pair-to-a-javascript-object
+
 
 
 
