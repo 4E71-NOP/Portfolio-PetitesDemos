@@ -160,23 +160,21 @@ nexus.get("/justify", (req, res) => {
 nexus.post("/justify", (req, res) => {
 	console.log("Route POST 'Justify' demandée.");
 	var post = {};
-	if ( req.body ) {
-		console.log("Mode POST-BODY");
-		post = {
-		texte: req.body.texte,
-		cpl: req.body.cpl,
-	};
-	}
-	else {
+	if ( req.readable ) {												//Reconnait le type de données du POST
 		console.log("Mode POST-Text/plain");
 		var textPlain = "";
 		req.on('data', function (data) { textPlain += data; });
 		req.on('end', function () {
-			post = {
-				texte: JSON.parse(textPlain),
-				cpl: 80,												//valeur par défaut
-			};
+			console.log(textPlain);
+			post.texte = JSON.parse(textPlain);
+			// post.texte = "plouf"
+			// post.cpl = 80;
 		});
+	}
+	else {
+		console.log("Mode POST-BODY");
+		post.texte = req.body.texte;
+		post.cpl =  req.body.cpl;
 	}
 	res.type("text/plain");
 	res.send(JustifieTexte(post));
