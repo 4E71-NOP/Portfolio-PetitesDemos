@@ -1,4 +1,11 @@
-npm i g http url path cors express
+npm i g 
+http 
+url 
+path 
+cors 
+express
+cookie-parser 
+express-session ???
 
 ------------------------------------------------------------------------
 JavaScript :

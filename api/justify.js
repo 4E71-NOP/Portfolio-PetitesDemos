@@ -137,6 +137,7 @@ function JustifieTexte(post) {
 }
 
 
+
 // -----------------------------------------------------
 //	
 //	Gestion des routes
@@ -160,31 +161,33 @@ nexus.get("/justify", (req, res) => {
 nexus.post("/justify", (req, res) => {
 	console.log("Route POST 'Justify' demandée.");
 	var post = {};
-	if ( req.readable ) {												//Reconnait le type de données du POST
+	post.texte = "";
+	post.cpl = 80;													// Par défaut
+	if (req.readable) {												// Reconnait le type de données du POST
 		console.log("Mode POST-Text/plain");
 		var textPlain = "";
 		req.on('data', function (data) { textPlain += data; });
 		req.on('end', function () {
-			console.log(textPlain);
-			post.texte = JSON.parse(textPlain);
-			// post.texte = "plouf"
-			// post.cpl = 80;
+			post.texte = textPlain.replace(/texte=/g, "");
+			post.cpl = 80;
+			res.type("text/plain");
+			res.send(JustifieTexte(post));
 		});
 	}
 	else {
 		console.log("Mode POST-BODY");
 		post.texte = req.body.texte;
-		post.cpl =  req.body.cpl;
+		post.cpl = req.body.cpl;
+		res.type("text/plain");
+		res.send(JustifieTexte(post));
 	}
-	res.type("text/plain");
-	res.send(JustifieTexte(post));
 });
-
+/*
 nexus.get("/*", (req, res) => {
 	res.sendFile(path.join(__dirname, '../pages/erreur.html'));
 	console.log("Aucune route demandée.");
 });
-
+*/
 // -----------------------------------------------------
 //	
 //	Le truc qu'on oublie tout le temps
