@@ -11,7 +11,7 @@
 /*jshint esversion: 6 */
 const path = require("path");
 const express = require("express");
-const nexus = express.Router();
+const ApiJustify = express.Router();
 
 //	-----------------------------------------------------
 // app.use(cors());
@@ -137,14 +137,13 @@ function JustifieTexte(post) {
 }
 
 
-
 // -----------------------------------------------------
 //	
 //	Gestion des routes
 //	
 //	-----------------------------------------------------
-nexus.get("/justify/:cpl/:text", (req, res) => {
-	console.log("Route GET 'Justify/+args' demandée.");
+ApiJustify.get("/justify/:cpl/:text", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'Justify/+args' demandée.");
 	const post = {
 		texte: req.params.texte,
 		cpl: req.params.cpl,
@@ -152,19 +151,19 @@ nexus.get("/justify/:cpl/:text", (req, res) => {
 	console.log (JustifieTexte(post));
 });
 
-nexus.get("/justify", (req, res) => {
-	console.log("Route GET 'Justify' sans argument demandée.");
+ApiJustify.get("/justify", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'Justify' sans argument demandée.");
 	res.type("text/plain");
 	res.send(JustifieTexte(soumissionVide));
 });
 
-nexus.post("/justify", (req, res) => {
-	console.log("Route POST 'Justify' demandée.");
+ApiJustify.post("/justify", (req, res) => {
+	console.log(new Date(Date.now())+" Route POST 'Justify' demandée.");
 	var post = {};
 	post.texte = "";
 	post.cpl = 80;													// Par défaut
-	if (req.readable) {												// Reconnait le type de données du POST
-		console.log("Mode POST-Text/plain");
+	if (req.readable) {												// Sencé Reconnaitre le type de données du POST
+		console.log(new Date(Date.now())+" Mode POST-Text/plain");
 		var textPlain = "";
 		req.on('data', function (data) { textPlain += data; });
 		req.on('end', function () {
@@ -175,7 +174,7 @@ nexus.post("/justify", (req, res) => {
 		});
 	}
 	else {
-		console.log("Mode POST-BODY");
+		console.log(new Date(Date.now())+" Mode POST-BODY");
 		post.texte = req.body.texte;
 		post.cpl = req.body.cpl;
 		res.type("text/plain");
@@ -183,7 +182,7 @@ nexus.post("/justify", (req, res) => {
 	}
 });
 /*
-nexus.get("/*", (req, res) => {
+ApiJustify.get("/*", (req, res) => {
 	res.sendFile(path.join(__dirname, '../pages/erreur.html'));
 	console.log("Aucune route demandée.");
 });
@@ -191,5 +190,5 @@ nexus.get("/*", (req, res) => {
 // -----------------------------------------------------
 //	
 //	Le truc qu'on oublie tout le temps
-module.exports = nexus;
+module.exports = ApiJustify;
 

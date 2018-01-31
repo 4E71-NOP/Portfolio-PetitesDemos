@@ -12,42 +12,42 @@ const path = require("path");
 const express = require("express");
 const token = express.Router();
 
-
 // -----------------------------------------------------
 //	
 //	Gestion des routes
 //	
 //	-----------------------------------------------------
-token.get("/validation/:email", (req, res) => {
-	console.log("Route GET 'validation' sans argument demandée.");
-	var email = req.params.email;
+token.get("/token/:email", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token' +1 argument demandée.");
 
-	if ( !req.session.cookie.maxAge ) {
-		//req.session.cookie.expires = new Date(Date.now() + hour);
+	var email = req.params.email;
+	if ( !req.session.dejavu ) {
+		req.session.dejavu = 1;
+		req.session.debut = new Date(Date.now());
 		req.session.cookie.maxAge = 24*3600000;
-		req.session.cookie.email = email;
+		req.session.email = email;
+		req.session.SessionActuelle = req.sessionID;
+		console.log(new Date(Date.now())+" Mise a jour de la session");
 	}
 
 	res.type("application/json");
 	if (email.length > 0) {
 		res.json({ "status": 200, 
-		"data": req.session.cookie,
-		"id":req.sessionID,
-		"email":req.session.cookie.email,
-	});
+		"session":req.session,
+		});
 	}
 	else {
 		res.json({ "status": 200, "data": [{ "email": "NO-OK" }] });
 	}
 });
 
-token.get("/validation", (req, res) => {
-	console.log("Route GET 'validation' sans argument demandée.");
+token.get("/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token' sans argument demandée.");
 	res.send("Pas de vérification possible");
 });
 
-token.post("/validation", (req, res) => {
-	console.log("Route POST 'validation'");
+token.post("/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route POST 'token'");
 	var email = req.body.email;
 	if (email.length > 0) {
 		res.type("application/json");

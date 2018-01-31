@@ -14,17 +14,22 @@ const url = require("url");
 const path = require("path");
 const cors = require("cors");
 const express = require("express");
-const bodyParser = require("body-parser");
-//const cookieParser = require('cookie-parser');
+const bodyParserJson = require("body-parser");
+const bodyParserTxt = require("body-parser");
+const cookieParser = require('cookie-parser');
+const request = require('request');
 
 //	-----------------------------------------------------
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-//app.use(bodyParser.text());
-//app.use(bodyParser.urlencoded({extended:false}));
-//app.use(cookieParser());
+const nexus = express();
+nexus.use(cors());
 
+// nexus.use(bodyParserJson.json());
+// nexus.use(bodyParserJson.urlencoded({extended:false}));
+
+nexus.use(bodyParserTxt.text());
+nexus.use(bodyParserTxt.urlencoded({extended:false}));
+
+nexus.use(cookieParser());
 
 // -----------------------------------------------------
 //	
@@ -33,14 +38,16 @@ app.use(bodyParser.json());
 //	-----------------------------------------------------
 //https://github.com/expressjs/session
 var session = require('express-session')
-app.set('trust proxy', 1) // trust first proxy
-app.use(session({
+nexus.set('trust proxy', 1) 							// Confiance dans le 1er proxy.
+nexus.use(session({
+	cookieName: 'PetDemSession',
 	secret: 'trololololol321654987',
 	resave: false,
 	saveUninitialized: true,
-	cookie: { secure: true }
+	cookie: { secure: false }
 }));
 
+// Les autres fonctions
 // req.session.regenerate(function(err) {});		// will have a new session here
 // req.session.destroy(function(err) {});			// cannot access session here
 // req.session.reload(function(err) {});            // session updated
@@ -52,26 +59,65 @@ app.use(session({
 //	
 //	-----------------------------------------------------
 apiJustify = require("./api/justify");
-app.use("/api", apiJustify);
+nexus.use("/api", apiJustify);
 
 apiToken = require("./api/token");
-app.use("/api", apiToken);
+nexus.use("/api", apiToken);
 
-app.get("/ok", (req, res) => {
-	console.log("Route 'ok' demandée.");
+nexus.get("/ok", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
 	res.sendFile(path.join(__dirname, '/pages/ok.html'));
 });
 
-app.get("/*", (req, res) => {
+
+// -----------------------------------------------------
+//	
+//	Test de requete http
+//	
+//	-----------------------------------------------------
+nexus.get("/bounceAuth/:email", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'bounceAuth' demandée.");
+
+	request('http://localhost:8080/api/token/toto@toto.fr', { json: true }, (err, result, body) => {
+		if (err) { return console.log(err); }
+		console.log(body.url);
+		console.log(body.explanation);
+		res.type("application/json");
+		res.json({ "status": 200, "data": [{ "body": body }] });
+	});
+});
+
+
+nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'bounceJustify' demandée.");
+
+	request("http://localhost:8080/api/justify/"+req.params.cpl+"/"+req.params.texte, { json: true }, (err, result, body) => {
+		if (err) { return console.log(err); }
+		console.log(body.url);
+		console.log(body.explanation);
+		res.type("application/json");
+		res.json({ "status": 200, "data": [{ "body": body }] });
+	});
+});
+
+
+
+
+// -----------------------------------------------------
+//	
+//	By your command... or not
+//	
+//	-----------------------------------------------------
+nexus.get("/*", (req, res) => {
 	res.sendFile(path.join(__dirname, '/pages/erreur.html'));
-	console.log("Routes: Aucune route demandée.");
+	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
 });
 // -----------------------------------------------------
 //	
 //	Instaciation du serveur
 //	
 //	-----------------------------------------------------
-var serveur = app.listen(8080, function () {
+var serveur = nexus.listen(8080, function () {
 	const host = serveur.address().address;
 	const port = serveur.address().port;
 	console.log("---------------------------\nServeur NodeJS\nPort d'écoute: " + host + "," + port + "\n---------------------------\n\n\n\n\n\n\n\n\n");

@@ -4,8 +4,9 @@ url
 path 
 cors 
 express
+express-session
+request
 cookie-parser 
-express-session ???
 
 ------------------------------------------------------------------------
 JavaScript :
@@ -40,6 +41,7 @@ https://stackoverflow.com/questions/12345166/how-to-force-parse-request-body-as-
 
 NEW POST
 http://www.primaryobjects.com/2012/11/11/reading-post-data-in-node-js-express-easy-manager-method/
+https://github.com/primaryobjects/easypost
 
 
 
@@ -80,6 +82,11 @@ Gestion objet:
 https://stackoverflow.com/questions/1168807/how-can-i-add-a-key-value-pair-to-a-javascript-object
 
 
+Appeller une autre API
+http://www.eloquentwebapp.com/comsume-restful-api/
+https://www.twilio.com/blog/2017/08/http-requests-in-node-js.html
 
 
-
+DEVOPS
+http://www.lemagit.fr/definition/DevOps
+https://codeburst.io/4-ways-for-making-http-s-requests-with-node-js-c524f999942d
