@@ -142,13 +142,15 @@ function JustifieTexte(post) {
 //	Gestion des routes
 //	
 //	-----------------------------------------------------
-ApiJustify.get("/justify/:cpl/:text", (req, res) => {
+ApiJustify.get("/justify/:cpl/:texte", (req, res) => {
 	console.log(new Date(Date.now())+" Route GET 'Justify/+args' demandée.");
 	const post = {
 		texte: req.params.texte,
 		cpl: req.params.cpl,
 	};
 	console.log (JustifieTexte(post));
+	res.type("text/plain");
+	res.send(JustifieTexte(post));
 });
 
 ApiJustify.get("/justify", (req, res) => {

@@ -87,11 +87,13 @@ nexus.get("/bounceAuth/:email", (req, res) => {
 	});
 });
 
-
+// A débugger
 nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
 	console.log(new Date(Date.now())+" Route 'bounceJustify' demandée.");
+	console.log(req.params.cpl + "/" + req.params.texte);
 
 	request("http://localhost:8080/api/justify/"+req.params.cpl+"/"+req.params.texte, { json: true }, (err, result, body) => {
+	//request("http://localhost:8080/api/justify", { json: true }, (err, result, body) => {
 		if (err) { return console.log(err); }
 		console.log(body.url);
 		console.log(body.explanation);

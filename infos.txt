@@ -90,3 +90,9 @@ https://www.twilio.com/blog/2017/08/http-requests-in-node-js.html
 DEVOPS
 http://www.lemagit.fr/definition/DevOps
 https://codeburst.io/4-ways-for-making-http-s-requests-with-node-js-c524f999942d
+
+
+
+
+petitesdemos
+somedsetitep
