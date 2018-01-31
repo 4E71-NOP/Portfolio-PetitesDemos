@@ -92,7 +92,4 @@ http://www.lemagit.fr/definition/DevOps
 https://codeburst.io/4-ways-for-making-http-s-requests-with-node-js-c524f999942d
 
 
-
-
-petitesdemos
-somedsetitep
+    "test": "echo \"Error: no test specified\" && exit 1"
