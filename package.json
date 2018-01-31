@@ -1,0 +1,30 @@
+{
+  "name": "portfolio-petitesdemos",
+  "version": "1.0.0",
+  "description": "Une petite API de justification de texte.",
+  "main": "PetitesDemos.js",
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "http": "^0.0.0",
+    "path": "^0.12.7",
+    "request": "^2.83.0",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4E71-NOP/Portfolio-PetitesDemos.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/4E71-NOP/Portfolio-PetitesDemos/issues"
+  },
+  "homepage": "https://github.com/4E71-NOP/Portfolio-PetitesDemos#readme"
+}
