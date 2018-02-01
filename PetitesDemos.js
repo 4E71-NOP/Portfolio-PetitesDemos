@@ -14,8 +14,8 @@ const url = require("url");
 const path = require("path");
 const cors = require("cors");
 const express = require("express");
-const bodyParserJson = require("body-parser");
-const bodyParserTxt = require("body-parser");
+// const bodyParserJson = require("body-parser");
+// const bodyParserTxt = require("body-parser");
 const cookieParser = require('cookie-parser');
 const request = require('request');
 

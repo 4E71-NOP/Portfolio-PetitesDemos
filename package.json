@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "supervisor PetitesDemos.js"
+    "start": "PetitesDemos.js"
   },
   "repository": {
     "type": "git",
