@@ -376,8 +376,3 @@ var serveur = nexus.listen(serveurPort, function () {
 	const port = serveur.address().port;
 	console.log("---------------------------\nServeur NodeJS\nPort d'écoute: " + host + "," + port + "\n---------------------------\n\n\n\n\n\n\n\n\n");
 });
-
-
-
-
-
