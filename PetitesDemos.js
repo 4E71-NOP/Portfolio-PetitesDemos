@@ -332,8 +332,10 @@ nexus.get("/*", (req, res) => {
 //	Instaciation du serveur
 //	
 //	-----------------------------------------------------
-const serveurPort = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-const serveurIp = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+const serveurPort =  8080;
+const serveurIp = "127.0.0.1";
+// const serveurPort = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+// const serveurIp = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 var serveur = nexus.listen(serveurPort, serveurIp, function () {
 	const host = serveur.address().address;

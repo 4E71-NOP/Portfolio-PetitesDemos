@@ -1,7 +1,7 @@
 {
   "name": "portfolio-petitesdemos",
   "version": "1.0.0",
-  "description": "Une petite API de justification de texte.",
+  "description": "Petites démos d'étudiant / Student Small Demos.",
   "main": "PetitesDemos.js",
   "dependencies": {
     "cookie-parser": "^1.4.3",
