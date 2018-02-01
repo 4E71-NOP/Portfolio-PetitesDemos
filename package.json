@@ -15,7 +15,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node PetitesDemos.js"
+    "start": "node PetitesDemos.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
