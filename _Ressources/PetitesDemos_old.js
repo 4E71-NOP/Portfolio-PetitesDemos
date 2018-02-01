@@ -102,9 +102,6 @@ nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
 	});
 });
 
-
-
-
 // -----------------------------------------------------
 //	
 //	By your command... or not
@@ -114,17 +111,17 @@ nexus.get("/*", (req, res) => {
 	res.sendFile(path.join(__dirname, '/pages/erreur.html'));
 	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
 });
+
 // -----------------------------------------------------
 //	
 //	Instaciation du serveur
 //	
 //	-----------------------------------------------------
-const serveurPort = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-const serveurIp = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+const serveurPort =  process.env.PORT || 8080;
+const serveurIp = "127.0.0.1";
 
-var serveur = nexus.listen(serveurPort, serveurIp, function () {
+var serveur = nexus.listen(serveurPort, function () {
 	const host = serveur.address().address;
 	const port = serveur.address().port;
 	console.log("---------------------------\nServeur NodeJS\nPort d'écoute: " + host + "," + port + "\n---------------------------\n\n\n\n\n\n\n\n\n");
 });
-

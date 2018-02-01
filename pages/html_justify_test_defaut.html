@@ -10,11 +10,12 @@
 
 <body>
 	<h1>Petites demos: 'Justifier Monospace'</h1>
-	(Méthode POST plain/text)
+	(Méthode POST par défaut)
 
 	<!-- enctype="text/plain" -->
 	<div style='width:85%; margin:0 auto 0 auto;'>
-		<form method='POST' name='api-justify' action='http://localhost:8080/api/justify' enctype="text/plain">
+		<!-- <form method='POST' name='api-justify' action='https://agile-meadow-15719.herokuapp.com/api/justify' > -->
+		<form method='POST' name='api-justify' action='http://localhost:8080/api/justify'>
 			Texte à formatter:
 			<br>
 			<textarea name='texte' cols='50' rows='5'>Longtemps, je me suis couché de bonne heure. Parfois, à peine ma bougie éteinte, mes yeux se fermaient si vite que je n’avais pas le temps de me dire: «Je m’endors.» Et, une demi-heure après, la pensée qu’il était temps de chercher le sommeil m’éveillait; je voulais poser le volume que je croyais avoir dans les mains et souffler ma lumière; je n’avais pas cessé en dormant de faire des réflexions sur ce que je venais de lire, mais ces réflexions avaient pris un tour un peu particulier; il me semblait que j’étais moi-même ce dont parlait l’ouvrage: une église, un quatuor, la rivalité de François Ier et de Charles-Quint.
@@ -26,8 +27,8 @@ In pulvinar ipsum eu tellus fringilla pretium. Duis ornare blandit lectus, id al
 Curabitur volutpat eleifend nunc id volutpat. Fusce a libero ligula. Curabitur in nunc ac lacus ultricies volutpat sed non nunc. Integer eu magna in velit tincidunt aliquet eget ac velit. Nam rutrum arcu id odio semper, quis egestas velit vehicula. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque tempor mattis est, vel commodo sapien blandit quis. Proin malesuada quam venenatis nulla eleifend pretium. Aenean quis ex semper, interdum nunc eget, condimentum est. Proin venenatis quis mauris et accumsan. Donec placerat neque sit amet sodales imperdiet. Etiam diam libero, vestibulum vitae suscipit ultrices, vestibulum nec justo. Phasellus congue mi convallis scelerisque semper.
 </textarea>
 			<br>
-
-
+			<br> Nombre de caractères par ligne souhaité:
+			<input type='text' name='cpl' placeholder='Entrez une valeur' value='80' size='5'>
 			<input class='btn btn-info' type='submit' value='Formatter'>
 		</form>
 	</div>

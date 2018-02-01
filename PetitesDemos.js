@@ -1,4 +1,4 @@
-// -----------------------------------------------------
+//	-----------------------------------------------------
 //	
 //	
 //	Petite démo de justification de texte.
@@ -14,7 +14,7 @@ const url = require("url");
 const path = require("path");
 const cors = require("cors");
 const express = require("express");
-// const bodyParserJson = require("body-parser");
+const bodyParserJson = require("body-parser");
 // const bodyParserTxt = require("body-parser");
 const cookieParser = require('cookie-parser');
 const request = require('request');
@@ -23,15 +23,13 @@ const request = require('request');
 const nexus = express();
 nexus.use(cors());
 
-// nexus.use(bodyParserJson.json());
-// nexus.use(bodyParserJson.urlencoded({extended:false}));
-
+nexus.use(bodyParserJson.json());
+nexus.use(bodyParserJson.urlencoded({extended:false}));
 // nexus.use(bodyParserTxt.text());
 // nexus.use(bodyParserTxt.urlencoded({extended:false}));
-
 nexus.use(cookieParser());
 
-// -----------------------------------------------------
+//	-----------------------------------------------------
 //	
 //	Gestion session
 //	
@@ -53,26 +51,15 @@ nexus.use(session({
 // req.session.reload(function(err) {});            // session updated
 // req.session.save(function(err) {});				// session saved
 
-// -----------------------------------------------------
+//	-----------------------------------------------------
 //	
 //	Gestion des routes
 //	
 //	-----------------------------------------------------
-// apiJustify = require("./api/justify");
-// nexus.use("/api", apiJustify);
 
-// apiToken = require("./api/token");
-// nexus.use("/api", apiToken);
-
-nexus.get("/ok", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/ok.html'));
-});
-
-
-// -----------------------------------------------------
+//	-----------------------------------------------------
 //	
-//	Test de requete http
+//	Test de requete http sur elle même
 //	
 //	-----------------------------------------------------
 nexus.get("/bounceAuth/:email", (req, res) => {
@@ -86,7 +73,6 @@ nexus.get("/bounceAuth/:email", (req, res) => {
 		res.json({ "status": 200, "data": [{ "body": body }] });
 	});
 });
-
 
 nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
 	console.log(new Date(Date.now())+" Route 'bounceJustify' demandée.");
@@ -223,8 +209,7 @@ function JustifieTexte(post) {
 	return rendu;
 }
 
-
-// -----------------------------------------------------
+//	-----------------------------------------------------
 //	
 //	Gestion des routes /JUSTIFY
 //	
@@ -259,7 +244,7 @@ nexus.post("/api/justify", (req, res) => {
 			post.texte = textPlain.replace(/texte=/g, "");
 			post.cpl = 80;
 			res.type("text/plain");
-			res.send(JustifieTexte(post));
+			res.send("Mode POST-Text/plain\n"+JustifieTexte(post));
 		});
 	}
 	else {
@@ -267,45 +252,76 @@ nexus.post("/api/justify", (req, res) => {
 		post.texte = req.body.texte;
 		post.cpl = req.body.cpl;
 		res.type("text/plain");
-		res.send(JustifieTexte(post));
+		res.send("Mode POST-BODY\n"+JustifieTexte(post));
 	}
 });
 
 
-
+//	-----------------------------------------------------
+//	
+//	Fonction de gestion de la session en cours
+//	
+//	-----------------------------------------------------
+function GestionSession ( commande , req , obj ) {
+	switch ( commande ){
+		case "EmailFourni":
+		if ( !req.session.dejavu ) {
+			req.session.dejavu = 1;
+			req.session.debut = new Date(Date.now());
+			req.session.cookie.maxAge = 24*3600000;
+			req.session.email = obj.email;
+			req.session.CompteurMots = 0;
+			req.session.SessionActuelle = req.sessionID;
+			console.log(new Date(Date.now())+" Mise a jour de la session");
+		}
+		break;
+		case "AjoutCompteurMot":
+			req.session.CompteurMots += obj.nbrMots;
+		break;
+		case "Authorisation":
+			if ( req.session.CompteurMots > 80000 ) {
+				var reponse = "GetAwayNoob";
+			}
+		break;
+	}
+	if ( reponse ) { return reponse; }
+}
 
 // -----------------------------------------------------
 //	
 //	Gestion des routes /TOKEN
 //	
 //	-----------------------------------------------------
+nexus.get("/api/token/destroysession", (req, res) => {
+	req.session.destroy(function(err) {
+		console.log(new Date(Date.now())+" Route GET 'token/destroysession' demandée.");
+		res.json({ "status": 200, "data": "bye bye session"});
+  });
+});
+
 nexus.get("/api/token/:email", (req, res) => {
 	console.log(new Date(Date.now())+" Route GET 'token' +1 argument demandée.");
 
 	var email = req.params.email;
-	if ( !req.session.dejavu ) {
-		req.session.dejavu = 1;
-		req.session.debut = new Date(Date.now());
-		req.session.cookie.maxAge = 24*3600000;
-		req.session.email = email;
-		req.session.SessionActuelle = req.sessionID;
-		console.log(new Date(Date.now())+" Mise a jour de la session");
-	}
-
-	res.type("application/json");
-	if (email.length > 0) {
-		res.json({ "status": 200, 
-		"session":req.session,
-		});
-	}
-	else {
-		res.json({ "status": 200, "data": [{ "email": "NO-OK" }] });
+	var sessionElm = {};
+	sessionElm.email = email;
+	if ( sessionElm.email.length > 0 ) { 
+		var verification = GestionSession ( "EmailFourni" , req , sessionElm ); 
+		if ( verification == "GetAwayNoob") {
+			res.json({ "status": 402, "data": [{ "email": "Gimme the loot!!" }] });
+		}
+		else {
+			res.json({ "status": 200, 
+			"session":req.session,
+			});
+		}
 	}
 });
 
 nexus.get("/api/token", (req, res) => {
 	console.log(new Date(Date.now())+" Route GET 'token' sans argument demandée.");
-	res.send("Pas de vérification possible");
+	res.sendFile(path.join(__dirname, '/pages/token_manqueEmail.html'));
+	// res.send("Pas de vérification possible sans un email ");
 });
 
 nexus.post("/api/token", (req, res) => {
@@ -323,6 +339,26 @@ nexus.post("/api/token", (req, res) => {
 //	By your command... or not
 //	
 //	-----------------------------------------------------
+nexus.get("/ok", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/ok.html'));
+});
+
+nexus.get("/formJustify01", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_defaut.html'));
+});
+
+nexus.get("/formJustify02", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_plaintext.html'));
+});
+
+nexus.get("/", (req, res) => {
+	res.sendFile(path.join(__dirname, '/pages/menu_principal.html'));
+	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
+});
+
 nexus.get("/*", (req, res) => {
 	res.sendFile(path.join(__dirname, '/pages/erreur.html'));
 	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
