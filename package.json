@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "PetitesDemos.js"
+    "start": "node PetitesDemos.js"
   },
   "repository": {
     "type": "git",
