@@ -9,64 +9,33 @@
 
 <body>
 	<div style='width:50%; margin:3em auto 3em auto; padding:2em;'>
-		<h2>Petites démos NodeJS:</h2><br><br>
-		Menu:<br>
-
-		<!-- Réponse simple<br>
-		<a href='http://localhost:8080/api/'>Requete sans arguments</a><br>
-		<a href='http://localhost:8080/api/ok'>Réponse simple (ok)</a><br>
+		<h1>Petites API-démos (NodeJS):</h1><br><br>
+		<h3>Menu:</h3><br>
 		<br>
-		Authentification<br>
-		<a href='http://localhost:8080/api/token'>Echec Authentification</a><br>
-		<a href='http://localhost:8080/api/token/toto@toto.fr/titi'>Echec Authentification (refus)</a><br>
-		<a href='http://localhost:8080/api/token/toto@toto.fr/toto'>Succès Authentification</a><br>
-		<br>
-		Justification de texte<br>
-		<a href='http://localhost:8080/api/justify'>Justification paramètres par défaut</a><br>
-		<a href='http://localhost:8080/formJustify01'>Formulaire Justification (POST)</a><br>
-		<a href='http://localhost:8080/formJustify02'>Formulaire Justification (POST plain/text)</a><br> -->
-
-		<!-- <a href='http://localhost:8080/api/token/destroysession'>Destoy session</a><br> -->
 
 		Réponse simple<br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/'>Requete sans arguments</a><br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/ok'>Réponse simple (ok)</a><br>
+		<a href='/api/'>(GET) Requete sans arguments</a><br>
+		<a href='/ok'>(GET) Réponse simple (ok)</a><br>
 		<br>
 		Authentification<br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/token'>Echec Authentification</a><br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/token'>Echec Authentification (refus)</a><br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/token/toto@toto.fr'>Succès Authentification</a><br>
+		<a href='/api/token'>(GET) Echec Authentification</a><br>
+		<a href='/api/token/toto@toto.fr/titi'>(GET) Echec Authentification (refus)</a><br>
+		<a href='/api/token/toto@toto.fr/toto'>(GET) Succès Authentification</a><br>
+		<a href='/api/token/formToken01'>(POST) Formulaire Authentification</a><br>
+		<a href='/api/token/destroysession'>Destoy session</a><br>
 		<br>
 		Justification de texte<br>
-		<a href='https://agile-meadow-15719.herokuapp.com/api/justify'>Justification paramètres par défaut</a><br>
-		<a href='https://agile-meadow-15719.herokuapp.com/formJustify01'>Formulaire Justification (POST)</a><br>
-		<a href='https://agile-meadow-15719.herokuapp.com/formJustify02'>Formulaire Justification (POST plain/text)</a><br> 
-		
-
+		<a href='/api/justify'>(GET) Justification sans paramètres</a><br>
+		<a href='/api/justify/80/
+		Longtemps,%20je%20me%20suis%20couché%20de%20bonne%20heure.%20Parfois,%20à%20peine%20ma%20bougie%20éteinte,%20mes%20yeux%20se%20fermaient%20si%20vite%20que%20je%20n’avais%20pas%20le%20temps%20de%20me%20dire:%20«Je%20m’endors.»%20Et,%20une%20demi-heure%20après,%20la%20pensée%20qu’il%20était%20temps%20de%20chercher%20le%20sommeil%20m’éveillait;%20je%20voulais%20poser%20le%20volume%20que%20je%20croyais%20avoir%20dans%20les%20mains%20et%20souffler%20ma%20lumière;%20je%20n’avais%20pas%20cessé%20en%20dormant%20de%20faire%20des%20réflexions%20sur%20ce%20que%20je%20venais%20de%20lire,%20mais%20ces%20réflexions%20avaient%20pris%20un%20tour%20un%20peu%20particulier;%20il%20me%20semblait%20que%20j’étais%20moi-même%20ce%20dont%20parlait%20l’ouvrage:%20une%20église,%20un%20quatuor,%20la%20rivalité%20de%20François%20Ier%20et%20de%20Charles-Quint.
+Cette%20croyance%20survivait%20pendant%20quelques%20secondes%20à%20mon%20réveil;%20elle%20ne%20choquait%20pas%20ma%20raison,%20mais%20pesait%20comme%20des%20écailles%20sur%20mes%20yeux%20et%20les%20empêchait%20de%20se%20rendre%20compte%20que%20le%20bougeoir%20n’était%20plus%20allumé.Puis%20elle%20commençait%20à%20me%20devenir%20inintelligible,%20comme%20après%20la%20métempsycose%20les%20pensées%20d’une%20existence%20antérieure;%20le%20sujet%20du%20livre%20se%20détachait%20de%20moi,%20j’étais%20libre%20de%20m’y%20appliquer%20ou%20non;%20aussitôt%20je%20recouvrais%20la%20vue%20et%20j’étais%20bien%20étonné%20de%20trouver%20autour%20de%20moi%20une%20obscurité,%20douce%20et%20reposante%20pour%20mes%20yeux,%20mais%20peut-être%20plus%20encore%20pour%20mon%20esprit,%20à%20qui%20elle%20apparaissait%20comme%20une%20chose%20sans%20cause,%20incompréhensible,%20comme%20une%20chose%20vraiment%20obscure.%20Je%20me%20demandais%20quelle%20heure%20il%20pouvait%20être;%20j’entendais%20le%20sifflement%20des%20trains%20qui,%20plus%20ou%20moins%20éloigné,%20comme%20le%20chant%20d’un%20oiseau%20dans%20une%20forêt,%20relevant%20les%20distances,%20me%20décrivait%20l’étendue%20de%20la%20campagne%20déserte%20où%20le%20voyageur%20se%20hâte%20vers%20la%20station%20prochaine;%20et%20le%20petit%20chemin%20qu’il%20suit%20va%20être%20gravé%20dans%20son%20souvenir%20par%20l’excitation%20qu’il%20doit%20à%20des%20lieux%20nouveaux,%20à%20des%20actes%20inaccoutumés,%20à%20la%20causerie%20récente%20et%20aux%20adieux%20sous%20la%20lampe%20étrangère%20qui%20le%20suivent%20encore%20dans%20le%20silence%20de%20la%20nuit,%20à%20la%20douceur%20prochaine%20du%20retour.%20
+		'>
+		(GET) Justification paramètres par défaut</a><br>
+		<a href='/api/justify/formJustify01'>(POST par défaut) Formulaire Justification</a><br>
+		<a href='/api/justify/formJustify02'>(POST plain/text) Formulaire Justification</a><br>
 
 	</div>
 </body>
-
-
-<!-- 
-http://localhost:8080
-https://agile-meadow-15719.herokuapp.com
-
-Réponse simple<br>
-<a href='[URL_Emplacement]/api/'>Requete sans arguments</a><br>
-<a href='[URL_Emplacement]/api/ok'>Réponse simple (ok)</a><br>
-<br>
-Authentification<br>
-<a href='[URL_Emplacement]/api/token'>Echec Authentification</a><br>
-<a href='[URL_Emplacement]/api/token'>Echec Authentification (refus)</a><br>
-<a href='[URL_Emplacement]/api/token/toto@toto.fr'>Succès Authentification</a><br>
-<br>
-Justification de texte<br>
-<a href='[URL_Emplacement]/api/justify'>Justification paramètres par défaut</a><br>
-<a href='[URL_Emplacement]/formJustify01'>Formulaire Justification (POST)</a><br>
-<a href='[URL_Emplacement]/formJustify02'>Formulaire Justification (POST plain/text)</a><br> 
-
--->
 
 
 </html>

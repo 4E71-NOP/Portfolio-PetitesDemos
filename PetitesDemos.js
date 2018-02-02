@@ -31,6 +31,14 @@ nexus.use(cookieParser());
 
 //	-----------------------------------------------------
 //	
+//	Globales
+//	
+//	-----------------------------------------------------
+const justifierNombreMotsMax = 10000;
+const justifierTempsReinitialisation = 24;
+
+//	-----------------------------------------------------
+//	
 //	Gestion session
 //	
 //	-----------------------------------------------------
@@ -59,51 +67,121 @@ nexus.use(session({
 
 //	-----------------------------------------------------
 //	
-//	Gestion des routes /JUSTIFY
+//	Gestion des routes /api/justify
 //	
 //	-----------------------------------------------------
 nexus.get("/api/justify/:cpl/:texte", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'Justify/+args' demandée.");
-	const post = {
+	console.log(new Date(Date.now()) + " Route GET 'Justify/+args' demandée.");
+	var post = {
 		texte: req.params.texte,
 		cpl: req.params.cpl,
+		methode:"GET",
 	};
-	console.log (JustifieTexte(post));
-	res.type("text/plain");
-	res.send(JustifieTexte(post));
+	var obj = { email: req.session.email };
+	GestionJustification( req, res, obj, post )
 });
 
 nexus.get("/api/justify", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'Justify' sans argument demandée.");
+	console.log(new Date(Date.now()) + " Route GET 'Justify' sans argument demandée.");
 	res.type("text/plain");
-	res.send(JustifieTexte(soumissionVide));
+
+	var obj = { email: req.session.email };
+	var verificationAuth = GestionSession("VerifAuth", req, obj);
+	if (verificationAuth == 'auth-OK') {
+		res.type("text/html");
+		res.send("Votre session est connue, mais vous n'avez pas envoyé de données...");
+	}
+	else {
+		res.type("text/plain");
+		var renduJustification = JustifieTexte(soumissionVide);
+		res.send(renduJustification.texte);
+	}
 });
 
 nexus.post("/api/justify", (req, res) => {
-	console.log(new Date(Date.now())+" Route POST 'Justify' demandée.");
-	var post = {};
-	post.texte = "";
-	post.cpl = 80;													// Par défaut
-	if (req.readable) {												// Sencé Reconnaitre le type de données du POST
-		console.log(new Date(Date.now())+" Mode POST-Text/plain");
-		var textPlain = "";
-		req.on('data', function (data) { textPlain += data; });
-		req.on('end', function () {
-			post.texte = textPlain.replace(/texte=/g, "");
-			post.cpl = 80;
-			res.type("text/plain");
-			res.send("Mode POST-Text/plain\n"+JustifieTexte(post));
-		});
-	}
-	else {
-		console.log(new Date(Date.now())+" Mode POST-BODY");
-		post.texte = req.body.texte;
-		post.cpl = req.body.cpl;
-		res.type("text/plain");
-		res.send("Mode POST-BODY\n"+JustifieTexte(post));
-	}
+	console.log(new Date(Date.now()) + " Route POST 'Justify' demandée.");
+	var post = {
+		texte:req.body.texte,
+		cpl:req.body.cpl,
+		methode:"POST",
+	};
+	var obj = { email: req.session.email };
+	GestionJustification( req, res, obj, post );
 });
 
+
+nexus.get("/api/justify/formJustify01", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_defaut.html'));
+});
+
+nexus.get("/api/justify/formJustify02", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_plaintext.html'));
+});
+
+
+
+
+function GestionJustification( req, res, obj, post ) {
+	var verificationAuth = GestionSession("VerifAuth", req, obj);
+	var verificationCompteur = GestionSession("Authorisation", req, obj);
+
+	if (verificationAuth == 'auth-OK') {
+		if (verificationCompteur == "Droits-OK") {
+			if (req.readable && post.methode == "POST") {												// Sencé Reconnaitre le type de données du POST
+				console.log(new Date(Date.now()) + " Mode "+post.methode+"-Text/plain");
+				var textPlain = "";
+				req.on('data', function (data) { textPlain += data; });
+				req.on('end', function () {
+					post.texte = textPlain.replace(/texte=/g, "");
+					post.cpl = 80;
+					var renduJustification = JustifieTexte(post);
+					obj.nbrMots = renduJustification.nbrMots;
+					GestionSession("AjoutCompteurMot", req, obj);
+
+					res.type("text/plain");
+					res.send("Mode "+post.methode+"-Text/plain\nUtilisateur: " +
+						req.session.email +
+						"\nSession: " + req.sessionID +
+						"\nCe texte contient: " + renduJustification.nbrMots + " mots."+
+						"\nLargeur: " + post.cpl + " caractères."+
+						"\nCompteur :" + req.session.CompteurMots + "/" + justifierNombreMotsMax + "\n" +
+							"--------------------------------------\n" +
+						renduJustification.texte
+					);
+				});
+			}
+			else {
+				console.log(new Date(Date.now()) + " Mode "+post.methode+"-BODY");
+				res.type("text/plain");
+
+				var renduJustification = JustifieTexte(post);
+				obj.nbrMots = renduJustification.nbrMots;
+				GestionSession("AjoutCompteurMot", req, obj);
+
+				res.send("Mode "+post.methode+"-BODY\nUtilisateur: " +
+					req.session.email +
+					"\nSession: " + req.sessionID +
+					"\nCe texte contient: " + renduJustification.nbrMots + " mots."+
+					"\nLargeur: " + post.cpl + " caractères."+
+					"\nCompteur :" + req.session.CompteurMots + "/" + justifierNombreMotsMax + "\n" +
+					"--------------------------------------\n" +
+					renduJustification.texte
+				);
+			}
+		}
+		else {
+			res.type("text/html");
+			res.send("Vous avez atteint votre limite de quota. A plus sous le bus.");
+		}
+	}
+	else {
+		console.log(new Date(Date.now()) + "Route "+post.method+" 'Justify' Utilisateur non reconnu");
+		res.type("text/html");
+		res.send("Vous n'êtes pas authentifié...");
+	}
+}
 
 // -----------------------------------------------------
 //	
@@ -117,19 +195,44 @@ nexus.get("/api/token/destroysession", (req, res) => {
   });
 });
 
+nexus.get("/api/token/formToken01", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_token_test_auth.html'));
+});
+
 nexus.get("/api/token/:email/:pass", (req, res) => {
 	console.log(new Date(Date.now())+" Route GET 'token +2 arguments' demandée.");
 
-	var sessionElm = {};
-	sessionElm.email = req.params.email;
-	sessionElm.pass = req.params.pass;
+	var sessionElm = {
+		email : req.params.email,
+		pass : req.params.pass,
+	};
+	tokenAuthentification (req, res, sessionElm);
+});
 
+nexus.get("/api/token/:a", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token avec 1 seul argument' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
+});
+nexus.get("/api/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token sans argument' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
+});
+
+
+nexus.post("/api/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route POST 'token'");
+	var sessionElm = {
+		email : req.body.email,
+		pass : req.body.pass,
+	};
+	tokenAuthentification (req, res, sessionElm);
+});
+
+
+function tokenAuthentification (req, res, sessionElm) {
 	if ( sessionElm.email.length > 0 && sessionElm.pass.length > 0 ) { 
 		var verification = GestionSession ( "AuthLogPass" , req , sessionElm ); 
-
-		if ( verification == "GetAwayNoob") {
-			res.json({ "status": 402, "data": [{ "email": "Gimme the loot!!" }] });
-		}
 		if ( verification == "auth-OK") {
 			res.json({ "status": 200,
 			"message":"Vous êtes authentifié.",
@@ -146,26 +249,9 @@ nexus.get("/api/token/:email/:pass", (req, res) => {
 	else {
 		res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
 	}
-});
+}
 
-nexus.get("/api/token/:a", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'token avec 1 seul argument' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
-});
-nexus.get("/api/token", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'token sans argument' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
-});
-/*
-nexus.post("/api/token", (req, res) => {
-	console.log(new Date(Date.now())+" Route POST 'token'");
-	var email = req.body.email;
-	if (email.length > 0) {
-		res.type("application/json");
-		res.json({ "status": 200, "data": [{ "email": email }] });
-	}
-});
-*/
+
 //	-----------------------------------------------------
 //	
 //	EN TEST
@@ -209,16 +295,6 @@ nexus.get("/ok", (req, res) => {
 	res.sendFile(path.join(__dirname, '/pages/ok.html'));
 });
 
-nexus.get("/formJustify01", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/html_justify_test_defaut.html'));
-});
-
-nexus.get("/formJustify02", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/html_justify_test_plaintext.html'));
-});
-
 nexus.get("/", (req, res) => {
 	res.sendFile(path.join(__dirname, '/pages/menu_principal.html'));
 	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
@@ -245,48 +321,45 @@ function GestionSession ( commande , req , obj ) {
 		if ( SimulationBDD[obj.email] ) {
 			if (SimulationBDD[obj.email].pass === obj.pass ) { 
 				var reponse = "auth-OK"; 
-				if ( !req.session.dejavu ) {
-					req.session.authok = 1;
-					req.session.dejavu = 1;
-					req.session.debut = new Date(Date.now());
-					req.session.cookie.maxAge = 24*3600000;
-					req.session.email = obj.email;
-					req.session.CompteurMots = 0;
-					req.session.SessionActuelle = req.sessionID;
+				req.session.authok = 1;
+				req.session.debut = Date.now();
+				req.session.cookie.maxAge = 24*3600000;
+				req.session.email = obj.email;
+				req.session.CompteurMots = 0;
+				req.session.SessionActuelle = req.sessionID;
 
-					SimulationBDD[obj.email].sessionID = req.sessionID;
-					console.log(new Date(Date.now())+"GestionSession: Mise a jour de la session");
-				}
+				SimulationBDD[obj.email].sessionID = req.sessionID;
+				console.log(new Date(Date.now())+" GestionSession: Mise a jour de la session");
 			}
 			else { var reponse = "auth-KO"; }
 			console.log ("GestionSession : " + reponse);
-			// console.log (SimulationBDD[obj.email]);
-			// console.log (obj);
 		}
 		break;
-
 		case "VerifAuth":
 		if ( SimulationBDD[obj.email] ) {
 			if ( req.sessionID == SimulationBDD[obj.email].sessionID ) {
-				console.log(new Date(Date.now())+"GestionSession: VerifAuth ok");
+				console.log(new Date(Date.now())+" GestionSession: VerifAuth ok");
 				var reponse = "auth-OK";
 			}
 			else {
-				console.log(new Date(Date.now())+"GestionSession: VerifAuth KO");
+				console.log(new Date(Date.now())+" GestionSession: VerifAuth KO");
 				var reponse = "auth-KO";
 			}
 		}
 		break;
-
 		case "AjoutCompteurMot":
-			SimulationBDD[obj.email].CompteurMots += obj.nbrMots
-			req.session.CompteurMots += obj.nbrMots;
+			req.session.CompteurMots = SimulationBDD[obj.email].CompteurMots += obj.nbrMots
 		break;
 
 		case "Authorisation":
-			if ( req.session.CompteurMots > 80000 ) {
-				var reponse = "GetAwayNoob";
+			var dateMaintenant = Date.now();
+			var ageSession = dateMaintenant - req.session.debut;
+			if ( ageSession > (justifierTempsReinitialisation*3600000) ) {
+				req.session.debut = Date.now();
 			}
+			console.log(new Date(Date.now())+" GestionSession: Age = " + (ageSession/1000) + " secondes");
+			if ( req.session.CompteurMots > justifierNombreMotsMax ) { var reponse = "GetAwayNoob";	}
+			else {var reponse = "Droits-OK"; }
 		break;
 	}
 	if ( reponse ) { return reponse; }
@@ -361,10 +434,12 @@ function JustifieTexte(post) {
 
 	// -----------------------------------------------------
 	//	2eme phase de traitement
-	var rendu = "";
+	var rendu = {};
 	const rep = " ";
+	rendu.nbrMots = 0;
+	rendu.texte = "\n";
 
-	if (debug == "Stat") { rendu = rep.repeat(post.cpl) + "\t\t|Mots\t|Len\t|Coef\t|espace\t|comp\n"; }
+	if (debug == "Stat") { rendu.texte = rep.repeat(post.cpl) + "\t\t|Mots\t|Len\t|Coef\t|espace\t|comp\n"; }
 	ptr = 0;
 	for (elm in tab_ligne){
 		CoefEspace = 0;
@@ -398,11 +473,11 @@ function JustifieTexte(post) {
 			ptr++;
 			expr += "\n";
 		}
-		if ( debug == "Stat") { rendu += expr + "\t\t|" + tab_ligne[elm].nbrmot + "\t|" + expr.length + "\t|" + CoefEspace + "\t|" + EspaceCptr + "\t|" + compensation + "\n"; }		// Debug crasseux pour controle.
-		else { rendu += expr + "\n"; }								// Accumulation du résultat
+		if ( debug == "Stat") { rendu.texte += expr + "\t\t|" + tab_ligne[elm].nbrmot + "\t|" + expr.length + "\t|" + CoefEspace + "\t|" + EspaceCptr + "\t|" + compensation + "\n"; }		// Debug crasseux pour controle.
+		else { rendu.texte += expr + "\n"; }								// Accumulation du résultat
 
 		expr = "";
-	//	SessionCompteurMot += tab_ligne[elm].nbrmot;				// Comptage 
+		rendu.nbrMots += tab_ligne[elm].nbrmot;		// Comptage 
 	}
 	return rendu;
 }
