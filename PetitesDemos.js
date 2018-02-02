@@ -59,6 +59,116 @@ nexus.use(session({
 
 //	-----------------------------------------------------
 //	
+//	Gestion des routes /JUSTIFY
+//	
+//	-----------------------------------------------------
+nexus.get("/api/justify/:cpl/:texte", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'Justify/+args' demandée.");
+	const post = {
+		texte: req.params.texte,
+		cpl: req.params.cpl,
+	};
+	console.log (JustifieTexte(post));
+	res.type("text/plain");
+	res.send(JustifieTexte(post));
+});
+
+nexus.get("/api/justify", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'Justify' sans argument demandée.");
+	res.type("text/plain");
+	res.send(JustifieTexte(soumissionVide));
+});
+
+nexus.post("/api/justify", (req, res) => {
+	console.log(new Date(Date.now())+" Route POST 'Justify' demandée.");
+	var post = {};
+	post.texte = "";
+	post.cpl = 80;													// Par défaut
+	if (req.readable) {												// Sencé Reconnaitre le type de données du POST
+		console.log(new Date(Date.now())+" Mode POST-Text/plain");
+		var textPlain = "";
+		req.on('data', function (data) { textPlain += data; });
+		req.on('end', function () {
+			post.texte = textPlain.replace(/texte=/g, "");
+			post.cpl = 80;
+			res.type("text/plain");
+			res.send("Mode POST-Text/plain\n"+JustifieTexte(post));
+		});
+	}
+	else {
+		console.log(new Date(Date.now())+" Mode POST-BODY");
+		post.texte = req.body.texte;
+		post.cpl = req.body.cpl;
+		res.type("text/plain");
+		res.send("Mode POST-BODY\n"+JustifieTexte(post));
+	}
+});
+
+
+// -----------------------------------------------------
+//	
+//	Gestion des routes /TOKEN
+//	
+//	-----------------------------------------------------
+nexus.get("/api/token/destroysession", (req, res) => {
+	req.session.destroy(function(err) {
+		console.log(new Date(Date.now())+" Route GET 'token/destroysession' demandée.");
+		res.json({ "status": 200, "data": "bye bye session"});
+  });
+});
+
+nexus.get("/api/token/:email/:pass", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token +2 arguments' demandée.");
+
+	var sessionElm = {};
+	sessionElm.email = req.params.email;
+	sessionElm.pass = req.params.pass;
+
+	if ( sessionElm.email.length > 0 && sessionElm.pass.length > 0 ) { 
+		var verification = GestionSession ( "AuthLogPass" , req , sessionElm ); 
+
+		if ( verification == "GetAwayNoob") {
+			res.json({ "status": 402, "data": [{ "email": "Gimme the loot!!" }] });
+		}
+		if ( verification == "auth-OK") {
+			res.json({ "status": 200,
+			"message":"Vous êtes authentifié.",
+			"session":req.session,
+			});
+		}
+		if ( verification == "auth-KO") {
+			res.json({ "status": 401,
+			"message":"Echec de l'authentification.",
+			"session":req.session,
+			});
+		}
+	}
+	else {
+		res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
+	}
+});
+
+nexus.get("/api/token/:a", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token avec 1 seul argument' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
+});
+nexus.get("/api/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route GET 'token sans argument' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/token_parametreabsent.html'));
+});
+/*
+nexus.post("/api/token", (req, res) => {
+	console.log(new Date(Date.now())+" Route POST 'token'");
+	var email = req.body.email;
+	if (email.length > 0) {
+		res.type("application/json");
+		res.json({ "status": 200, "data": [{ "email": email }] });
+	}
+});
+*/
+//	-----------------------------------------------------
+//	
+//	EN TEST
 //	Test de requete http sur elle même
 //	
 //	-----------------------------------------------------
@@ -88,6 +198,100 @@ nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
 	});
 });
 
+
+// -----------------------------------------------------
+//	
+//	By your command... or not
+//	
+//	-----------------------------------------------------
+nexus.get("/ok", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/ok.html'));
+});
+
+nexus.get("/formJustify01", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_defaut.html'));
+});
+
+nexus.get("/formJustify02", (req, res) => {
+	console.log(new Date(Date.now())+" Route 'ok' demandée.");
+	res.sendFile(path.join(__dirname, '/pages/html_justify_test_plaintext.html'));
+});
+
+nexus.get("/", (req, res) => {
+	res.sendFile(path.join(__dirname, '/pages/menu_principal.html'));
+	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
+});
+
+nexus.get("/*", (req, res) => {
+	res.sendFile(path.join(__dirname, '/pages/erreur.html'));
+	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
+});
+
+//	-----------------------------------------------------
+//	
+//	Fonction de gestion de la session en cours
+//	
+//	-----------------------------------------------------
+var SimulationBDD = {
+	'toto@toto.fr':{ sessionID:'', email:'toto@toto.fr', pass:'toto', CompteurMots:0 },
+	'tata@tata.fr':{ sessionID:'', email:'tata@tata.fr', pass:'tata', CompteurMots:0 }
+};
+
+function GestionSession ( commande , req , obj ) {
+	switch ( commande ){
+		case "AuthLogPass":
+		if ( SimulationBDD[obj.email] ) {
+			if (SimulationBDD[obj.email].pass === obj.pass ) { 
+				var reponse = "auth-OK"; 
+				if ( !req.session.dejavu ) {
+					req.session.authok = 1;
+					req.session.dejavu = 1;
+					req.session.debut = new Date(Date.now());
+					req.session.cookie.maxAge = 24*3600000;
+					req.session.email = obj.email;
+					req.session.CompteurMots = 0;
+					req.session.SessionActuelle = req.sessionID;
+
+					SimulationBDD[obj.email].sessionID = req.sessionID;
+					console.log(new Date(Date.now())+"GestionSession: Mise a jour de la session");
+				}
+			}
+			else { var reponse = "auth-KO"; }
+			console.log ("GestionSession : " + reponse);
+			// console.log (SimulationBDD[obj.email]);
+			// console.log (obj);
+		}
+		break;
+
+		case "VerifAuth":
+		if ( SimulationBDD[obj.email] ) {
+			if ( req.sessionID == SimulationBDD[obj.email].sessionID ) {
+				console.log(new Date(Date.now())+"GestionSession: VerifAuth ok");
+				var reponse = "auth-OK";
+			}
+			else {
+				console.log(new Date(Date.now())+"GestionSession: VerifAuth KO");
+				var reponse = "auth-KO";
+			}
+		}
+		break;
+
+		case "AjoutCompteurMot":
+			SimulationBDD[obj.email].CompteurMots += obj.nbrMots
+			req.session.CompteurMots += obj.nbrMots;
+		break;
+
+		case "Authorisation":
+			if ( req.session.CompteurMots > 80000 ) {
+				var reponse = "GetAwayNoob";
+			}
+		break;
+	}
+	if ( reponse ) { return reponse; }
+}
+
 // -----------------------------------------------------
 //	
 //	
@@ -96,15 +300,9 @@ nexus.get("/bounceJustify/:cpl/:texte", (req, res) => {
 //	
 //	-----------------------------------------------------
 var soumissionVide = {};
-soumissionVide.texte = "********Sousmission vide********\n"+
-"Longtemps, je me suis couché de bonne heure. Parfois, à peine ma bougie éteinte, mes yeux se fermaient si vite que je n’avais pas le temps de me dire: «Je m’endors.» Et, une demi-heure après, la pensée qu’il était temps de chercher le sommeil m’éveillait; je voulais poser le volume que je croyais avoir dans les mains et souffler ma lumière; je n’avais pas cessé en dormant de faire des réflexions sur ce que je venais de lire, mais ces réflexions avaient pris un tour un peu particulier; il me semblait que j’étais moi-même ce dont parlait l’ouvrage: une église, un quatuor, la rivalité de François Ier et de Charles-Quint.\n"+
-"Cette croyance survivait pendant quelques secondes à mon réveil; elle ne choquait pas ma raison, mais pesait comme des écailles sur mes yeux et les empêchait de se rendre compte que le bougeoir n’était plus allumé.Puis elle commençait à me devenir inintelligible, comme après la métempsycose les pensées d’une existence antérieure; le sujet du livre se détachait de moi, j’étais libre de m’y appliquer ou non; aussitôt je recouvrais la vue et j’étais bien étonné de trouver autour de moi une obscurité, douce et reposante pour mes yeux, mais peut-être plus encore pour mon esprit, à qui elle apparaissait comme une chose sans cause, incompréhensible, comme une chose vraiment obscure. Je me demandais quelle heure il pouvait être; j’entendais le sifflement des trains qui, plus ou moins éloigné, comme le chant d’un oiseau dans une forêt, relevant les distances, me décrivait l’étendue de la campagne déserte où le voyageur se hâte vers la station prochaine; et le petit chemin qu’il suit va être gravé dans son souvenir par l’excitation qu’il doit à des lieux nouveaux, à des actes inaccoutumés, à la causerie récente et aux adieux sous la lampe étrangère qui le suivent encore dans le silence de la nuit, à la douceur prochaine du retour. \n"+
-"Loreméé ipsum dolor sit amet, consectetur adipiscing elit. Nullam hendrerit orci at sagittis ultrices. Mauris commodo blandit elit, eget rutrum lacus. Sed ultricies leo tincidunt mauris accumsan, sit amet pellentesque dui vulputate. Aliquam mollis diam id facilisis varius. Curabitur eget pretium velit. Sed in tempor ex. Integer blandit elit vitae lacinia tempus. Nullam dapibus, ligula ut imperdiet efficitur, mauris lacus rutrum arcu, sed egestas erat leo in nulla. Quisque tincidunt ex nunc, quis malesuada dolor pretium sed. Suspendisse convallis feugiat congue. Pellentesque dapibus magna elementum, semper nisl nec, blandit odio. Pellentesque odio lectus, sagittis sed laoreet quis, egestas eu dui. Mauris elementum quis metus vel ornare. Curabitur egestas id sem porta volutpat.\n"+
-"Etiam iaculis felis in arcu porta eleifend. Donec sit amet odio nulla. Nulla aliquet tincidunt turpis, sit amet volutpat nisl sodales in. Ut consectetur nec nulla nec dictum. Pellentesque volutpat egestas est. Cras tincidunt ex interdum, pellentesque mauris quis, tincidunt erat. Sed ullamcorper turpis a consequat dictum. Duis laoreet ultrices eros, sed blandit nibh fringilla et. Aenean interdum sapien eu congue scelerisque. Sed sodales lorem sed sodales hendrerit. Nullam quis tortor vitae ex placerat semper a tristique orci. Nulla elit nulla, vestibulum id consequat in, suscipit non lorem. Suspendisse id quam ac libero facilisis facilisis in quis lorem. Suspendisse fermentum, magna et dictum malesuada, lacus leo lacinia sapien, non dictum arcu orci vitae lectus. Ut auctor dictum metus nec mollis. Curabitur bibendum rutrum lectus eget interdum. \n"+
-"In et mollis erat, at lacinia dui. Fusce non dapibus diam. Pellentesque in eleifend turpis, vitae congue ligula. Cras placerat interdum eleifend. Aliquam tellus odio, rhoncus et suscipit ut, mattis feugiat eros. Maecenas egestas sodales mauris ut tincidunt. Sed mauris nunc, tempus vitae iaculis vitae, dapibus vel est.\n"+
-"In pulvinar ipsum eu tellus fringilla pretium. Duis ornare blandit lectus, id aliquam eros lacinia sed. Suspendisse nec molestie nunc, et sodales purus. Sed bibendum eros vel leo bibendum, vitae pharetra eros tempus. Proin convallis massa eget convallis molestie. Proin tempus ac diam in fringilla. Suspendisse rhoncus semper augue, non sagittis mi porta et. Aenean eu aliquet eros, at dignissim sapien. Quisque suscipit molestie rutrum. Donec in lectus ac metus hendrerit ultricies. Sed a ipsum nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. \n"+
-"Curabitur volutpat eleifend nunc id volutpat. Fusce a libero ligula. Curabitur in nunc ac lacus ultricies volutpat sed non nunc. Integer eu magna in velit tincidunt aliquet eget ac velit. Nam rutrum arcu id odio semper, quis egestas velit vehicula. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque tempor mattis est, vel commodo sapien blandit quis. Proin malesuada quam venenatis nulla eleifend pretium. Aenean quis ex semper, interdum nunc eget, condimentum est. Proin venenatis quis mauris et accumsan. Donec placerat neque sit amet sodales imperdiet. Etiam diam libero, vestibulum vitae suscipit ultrices, vestibulum nec justo. Phasellus congue mi convallis scelerisque semper.\n";
-soumissionVide.cpl = 80;
+soumissionVide.texte = "** Mode réduit / Limitation de service\n** Vous devez être un utilisateur connu\n** 40 colonnes\n"+
+"Longtemps, je me suis couché de bonne heure. Parfois, à peine ma bougie éteinte, mes yeux se fermaient si vite que je n’avais pas le temps de me dire: «Je m’endors.» Et, une demi-heure après, la pensée qu’il était temps de chercher le sommeil m’éveillait; je voulais poser le volume que je croyais avoir dans les mains et souffler ma lumière; je n’avais pas cessé en dormant de faire des réflexions sur ce que je venais de lire, mais ces réflexions avaient pris un tour un peu particulier; il me semblait que j’étais moi-même ce dont parlait l’ouvrage: une église, un quatuor, la rivalité de François Ier et de Charles-Quint.\n";
+soumissionVide.cpl = 40;
 
 function ArrondiPrecisionVariable(n, precision) {
 	var f = Math.pow(10, precision);
@@ -209,160 +407,7 @@ function JustifieTexte(post) {
 	return rendu;
 }
 
-//	-----------------------------------------------------
-//	
-//	Gestion des routes /JUSTIFY
-//	
-//	-----------------------------------------------------
-nexus.get("/api/justify/:cpl/:texte", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'Justify/+args' demandée.");
-	const post = {
-		texte: req.params.texte,
-		cpl: req.params.cpl,
-	};
-	console.log (JustifieTexte(post));
-	res.type("text/plain");
-	res.send(JustifieTexte(post));
-});
 
-nexus.get("/api/justify", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'Justify' sans argument demandée.");
-	res.type("text/plain");
-	res.send(JustifieTexte(soumissionVide));
-});
-
-nexus.post("/api/justify", (req, res) => {
-	console.log(new Date(Date.now())+" Route POST 'Justify' demandée.");
-	var post = {};
-	post.texte = "";
-	post.cpl = 80;													// Par défaut
-	if (req.readable) {												// Sencé Reconnaitre le type de données du POST
-		console.log(new Date(Date.now())+" Mode POST-Text/plain");
-		var textPlain = "";
-		req.on('data', function (data) { textPlain += data; });
-		req.on('end', function () {
-			post.texte = textPlain.replace(/texte=/g, "");
-			post.cpl = 80;
-			res.type("text/plain");
-			res.send("Mode POST-Text/plain\n"+JustifieTexte(post));
-		});
-	}
-	else {
-		console.log(new Date(Date.now())+" Mode POST-BODY");
-		post.texte = req.body.texte;
-		post.cpl = req.body.cpl;
-		res.type("text/plain");
-		res.send("Mode POST-BODY\n"+JustifieTexte(post));
-	}
-});
-
-
-//	-----------------------------------------------------
-//	
-//	Fonction de gestion de la session en cours
-//	
-//	-----------------------------------------------------
-function GestionSession ( commande , req , obj ) {
-	switch ( commande ){
-		case "EmailFourni":
-		if ( !req.session.dejavu ) {
-			req.session.dejavu = 1;
-			req.session.debut = new Date(Date.now());
-			req.session.cookie.maxAge = 24*3600000;
-			req.session.email = obj.email;
-			req.session.CompteurMots = 0;
-			req.session.SessionActuelle = req.sessionID;
-			console.log(new Date(Date.now())+" Mise a jour de la session");
-		}
-		break;
-		case "AjoutCompteurMot":
-			req.session.CompteurMots += obj.nbrMots;
-		break;
-		case "Authorisation":
-			if ( req.session.CompteurMots > 80000 ) {
-				var reponse = "GetAwayNoob";
-			}
-		break;
-	}
-	if ( reponse ) { return reponse; }
-}
-
-// -----------------------------------------------------
-//	
-//	Gestion des routes /TOKEN
-//	
-//	-----------------------------------------------------
-nexus.get("/api/token/destroysession", (req, res) => {
-	req.session.destroy(function(err) {
-		console.log(new Date(Date.now())+" Route GET 'token/destroysession' demandée.");
-		res.json({ "status": 200, "data": "bye bye session"});
-  });
-});
-
-nexus.get("/api/token/:email", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'token' +1 argument demandée.");
-
-	var email = req.params.email;
-	var sessionElm = {};
-	sessionElm.email = email;
-	if ( sessionElm.email.length > 0 ) { 
-		var verification = GestionSession ( "EmailFourni" , req , sessionElm ); 
-		if ( verification == "GetAwayNoob") {
-			res.json({ "status": 402, "data": [{ "email": "Gimme the loot!!" }] });
-		}
-		else {
-			res.json({ "status": 200, 
-			"session":req.session,
-			});
-		}
-	}
-});
-
-nexus.get("/api/token", (req, res) => {
-	console.log(new Date(Date.now())+" Route GET 'token' sans argument demandée.");
-	res.sendFile(path.join(__dirname, '/pages/token_manqueEmail.html'));
-	// res.send("Pas de vérification possible sans un email ");
-});
-
-nexus.post("/api/token", (req, res) => {
-	console.log(new Date(Date.now())+" Route POST 'token'");
-	var email = req.body.email;
-	if (email.length > 0) {
-		res.type("application/json");
-		res.json({ "status": 200, "data": [{ "email": email }] });
-	}
-});
-
-
-// -----------------------------------------------------
-//	
-//	By your command... or not
-//	
-//	-----------------------------------------------------
-nexus.get("/ok", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/ok.html'));
-});
-
-nexus.get("/formJustify01", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/html_justify_test_defaut.html'));
-});
-
-nexus.get("/formJustify02", (req, res) => {
-	console.log(new Date(Date.now())+" Route 'ok' demandée.");
-	res.sendFile(path.join(__dirname, '/pages/html_justify_test_plaintext.html'));
-});
-
-nexus.get("/", (req, res) => {
-	res.sendFile(path.join(__dirname, '/pages/menu_principal.html'));
-	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
-});
-
-nexus.get("/*", (req, res) => {
-	res.sendFile(path.join(__dirname, '/pages/erreur.html'));
-	console.log(new Date(Date.now())+" Routes: Aucune route demandée.");
-});
 // -----------------------------------------------------
 //	
 //	Instaciation du serveur
